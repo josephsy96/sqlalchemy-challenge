@@ -68,6 +68,7 @@ def stations():
     for station, name, latitude, longitude, elevation in s:
 
         station_dict = {}
+        station_dict['id'] = id
         station_dict['station'] = station
         station_dict['name'] = name
         station_dict['latitude'] = latitude
