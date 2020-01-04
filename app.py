@@ -19,9 +19,11 @@ Measurement = Base.classes.measurement
 Station = Base.classes.station
 
 
-
+#Create a Flask application
 app = Flask(__name__)
 
+
+#Assign routes for the Flask API
 @app.route("/")
 def welcome():
     print("Welcome to my weather API!")
@@ -30,8 +32,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end><br/>"
+        f"/api/v1.0/<start><br/>For example: /api/v1.0/2016-01-01<br/>"
+        f"/api/v1.0/<start>/<end><br/>For example: /api/v1.0/2016-01-01/2017-01-01"
     )
 
 @app.route('/api/v1.0/precipitation')
@@ -104,6 +106,53 @@ def tobs_data():
         tobs_list.append(tobs_dict)
 
     return jsonify(tobs_list)
+
+@app.route('/api/v1.0/<start>')
+def start_date(start):
+
+    session = Session(engine)
+
+    #start_session = ct = session.query(func.min(Measurement.tobs).label('Min Temp'), func.avg(Measurement.tobs).label('Average Temp'),\
+        #func.max(Measurement.tobs).label('Max Temp')).filter(Measurement.date >= str_iterator).all()
+    start_session = ct = session.query(func.min(Measurement.tobs).label('Min Temp'), func.avg(Measurement.tobs).label('Average Temp'),\
+        func.max(Measurement.tobs).label('Max Temp')).filter(Measurement.date >= start).all()
+    
+    session.close()
+
+    #data to append data into a JSON format
+    start_list = []
+
+    for min_temp, avg_temp, max_temp in start_session:
+        start_dict = {}
+        start_dict['Min Temp'] = min_temp
+        start_dict['Average Temp'] = avg_temp
+        start_dict['Max Temp'] = max_temp
+
+        start_list.append(start_dict)
+
+    return jsonify(start_list)
+
+@app.route('/api/v1.0/<start>/<end>')
+def start_end(start, end):
+
+    session = Session(engine)
+
+    s_e = session.query(func.min(Measurement.tobs).label('Min Temp'), func.avg(Measurement.tobs).label('Average Temp'),\
+        func.max(Measurement.tobs).label('Max Temp')).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    
+    session.close()
+
+    se_list = []
+
+    for min_temp, avg_temp, max_temp in s_e:
+        se_dict = {}
+        se_dict['Min Temp'] = min_temp
+        se_dict['Average Temp'] = avg_temp
+        se_dict['Max Temp'] = max_temp
+        se_list.append(se_dict)
+
+    return jsonify(se_list)
+    
 
 if __name__=="__main__":
     app.run(debug=True)
