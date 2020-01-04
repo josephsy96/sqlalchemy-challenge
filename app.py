@@ -44,6 +44,7 @@ def precip():
 
     session.close()
 
+    #data to append data into a JSON format
     all_prcp = []
 
     for date, prcp in prcp_q:
@@ -64,6 +65,7 @@ def stations():
     
     session.close()
 
+    #data to append data into a JSON format
     station_list = []
     
     for station, name in s:
@@ -75,6 +77,33 @@ def stations():
         station_list.append(station_dict)
     
     return jsonify(station_list)
+
+@app.route('/api/v1.0/tobs')
+def tobs_data():
+    print('Temperature Data')
+
+    session = Session(engine)
+
+    temp = session.query(Measurement.station, Measurement.tobs, Station.id, Station.name)\
+        .filter(Measurement.station==Station.station)\
+            .filter(Measurement.date.between('2016-08-23','2017-08-23')).all()
+
+    session.close()
+
+    #data to append data into a JSON format
+    tobs_list = []
+
+    for station, tobs, id, name in temp:
+
+        tobs_dict = {}
+        tobs_dict['station'] = station
+        tobs_dict['tobs'] = tobs
+        tobs_dict['id'] = id
+        tobs_dict['name'] = name
+
+        tobs_list.append(tobs_dict)
+
+    return jsonify(tobs_list)
 
 if __name__=="__main__":
     app.run(debug=True)
