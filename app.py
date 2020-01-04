@@ -60,20 +60,17 @@ def stations():
 
     session = Session(engine)
 
-    s = session.query(Station).all()
+    s = session.query(Station.station,Station.name).all()
     
     session.close()
 
     station_list = []
-    for station, name, latitude, longitude, elevation in s:
+    
+    for station, name in s:
 
         station_dict = {}
-        station_dict['id'] = id
         station_dict['station'] = station
         station_dict['name'] = name
-        station_dict['latitude'] = latitude
-        station_dict['longitude'] = longitude
-        station_dict['elevation'] = elevation
 
         station_list.append(station_dict)
     
